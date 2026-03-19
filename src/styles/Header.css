@@ -111,3 +111,35 @@
   .header-meta      { display: none; }
   .header-icon-btn.calendar-btn { display: none; }
 }
+
+.run-pipeline-btn {
+  background: linear-gradient(135deg, #00ff41 0%, #00d4ff 100%);
+  color: #0d1117;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 1rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 255, 65, 0.2);
+  margin-right: 0.5rem;
+}
+
+.run-pipeline-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 255, 65, 0.3);
+  filter: brightness(1.1);
+}
+
+.run-pipeline-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 640px) {
+  .run-pipeline-btn span { display: none; }
+  .run-pipeline-btn { padding: 0.5rem; }
+}

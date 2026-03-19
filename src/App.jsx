@@ -30,42 +30,55 @@ const PageWrapper = ({ children }) => (
   </motion.div>
 );
 
+import PipelineRunnerPopup from './pages/PipelineRunnerPopup';
+
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <BrowserRouter>
-      <div className="app-layout">
-        {/* Mobile overlay */}
-        <div
-          className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
-          onClick={() => setSidebarOpen(false)}
+      <Routes>
+        {/* Standalone terminal popup — no sidebar/header */}
+        <Route path="/pipeline-runner" element={<PipelineRunnerPopup />} />
+
+        {/* Main App Layout */}
+        <Route
+          path="*"
+          element={
+            <div className="app-layout">
+              {/* Mobile overlay */}
+              <div
+                className={`sidebar-overlay ${sidebarOpen ? 'open' : ''}`}
+                onClick={() => setSidebarOpen(false)}
+              />
+
+              {/* Sidebar */}
+              <div className={`sidebar-col ${sidebarOpen ? 'open' : ''}`}>
+                <Sidebar onNavigate={() => setSidebarOpen(false)} />
+              </div>
+
+              {/* Main content */}
+              <div className="main-col">
+                <Header onMenuToggle={() => setSidebarOpen((v) => !v)} />
+                <AnimatePresence mode="wait">
+                  <Routes>
+                    <Route path="/" element={<PageWrapper><DashboardPage /></PageWrapper>} />
+                    <Route path="/active-leads" element={<PageWrapper><ActiveLeadsPage /></PageWrapper>} />
+                    <Route path="/high-intent" element={<PageWrapper><HighIntentPage /></PageWrapper>} />
+                    <Route path="/companies" element={<PageWrapper><AllCompaniesPage /></PageWrapper>} />
+                    <Route path="/raw-scrapes" element={<PageWrapper><RawScrapesPage /></PageWrapper>} />
+                    <Route path="/job-events" element={<PageWrapper><JobEventsPage /></PageWrapper>} />
+                    <Route path="/ai-evaluations" element={<PageWrapper><AIEvaluationsPage /></PageWrapper>} />
+                    <Route path="/pipeline-runs" element={<PageWrapper><PipelineRunsPage /></PageWrapper>} />
+                    <Route path="/token-cache" element={<PageWrapper><TokenCachePage /></PageWrapper>} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </AnimatePresence>
+              </div>
+            </div>
+          }
         />
-
-        {/* Sidebar */}
-        <div className={`sidebar-col ${sidebarOpen ? 'open' : ''}`}>
-          <Sidebar onNavigate={() => setSidebarOpen(false)} />
-        </div>
-
-        {/* Main content */}
-        <div className="main-col">
-          <Header onMenuToggle={() => setSidebarOpen(v => !v)} />
-          <AnimatePresence mode="wait">
-            <Routes>
-              <Route path="/"                  element={<PageWrapper><DashboardPage /></PageWrapper>} />
-              <Route path="/active-leads"      element={<PageWrapper><ActiveLeadsPage /></PageWrapper>} />
-              <Route path="/high-intent"       element={<PageWrapper><HighIntentPage /></PageWrapper>} />
-              <Route path="/companies"         element={<PageWrapper><AllCompaniesPage /></PageWrapper>} />
-              <Route path="/raw-scrapes"       element={<PageWrapper><RawScrapesPage /></PageWrapper>} />
-              <Route path="/job-events"        element={<PageWrapper><JobEventsPage /></PageWrapper>} />
-              <Route path="/ai-evaluations"    element={<PageWrapper><AIEvaluationsPage /></PageWrapper>} />
-              <Route path="/pipeline-runs"     element={<PageWrapper><PipelineRunsPage /></PageWrapper>} />
-              <Route path="/token-cache"       element={<PageWrapper><TokenCachePage /></PageWrapper>} />
-              <Route path="*"                  element={<Navigate to="/" replace />} />
-            </Routes>
-          </AnimatePresence>
-        </div>
-      </div>
+      </Routes>
     </BrowserRouter>
   );
 }

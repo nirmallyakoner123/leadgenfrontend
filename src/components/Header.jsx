@@ -16,9 +16,20 @@ const PAGE_TITLES = {
   '/token-cache':    { title: 'Token Cache',     sub: 'Freshness status' },
 };
 
+import RegionModal from './RegionModal';
+
 const Header = ({ onMenuToggle }) => {
   const { pathname } = useLocation();
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
   const meta = PAGE_TITLES[pathname] || { title: 'LeadGen', sub: '' };
+
+  const handleStartPipeline = (region) => {
+    setIsModalOpen(false);
+    // Open a standalone browser popup window
+    // width=850,height=650 is a good size for a terminal
+    const url = `/pipeline-runner?region=${region}`;
+    window.open(url, 'PipelineRunner', 'width=900,height=700,status=no,menubar=no,toolbar=no');
+  };
 
   return (
     <header className="app-header glass-effect">
@@ -39,6 +50,13 @@ const Header = ({ onMenuToggle }) => {
       </div>
 
       <div className="header-right">
+        <button 
+          className="run-pipeline-btn"
+          onClick={() => setIsModalOpen(true)}
+        >
+          <span>⚡ Run Pipeline</span>
+        </button>
+
         <button className="header-icon-btn calendar-btn" aria-label="Notifications">
           <Bell size={18} />
           <span className="header-notif-dot" />
@@ -49,6 +67,12 @@ const Header = ({ onMenuToggle }) => {
           <div className="header-meta-sub">Active Run: #4012</div>
         </div>
       </div>
+
+      <RegionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleStartPipeline}
+      />
     </header>
   );
 };
