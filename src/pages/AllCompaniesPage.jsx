@@ -1,5 +1,5 @@
-import React from 'react';
-import { ExternalLink, MapPin } from 'lucide-react';
+import React, { useState } from 'react';
+import { ExternalLink, MapPin, Search } from 'lucide-react';
 import Pagination from '../components/Pagination';
 import { SkeletonTable, ErrorBanner, TableHead } from '../components/ui';
 import usePaginatedFetch from '../hooks/usePaginatedFetch';
@@ -16,11 +16,39 @@ const SOURCE_COLOR = {
 };
 
 const AllCompaniesPage = () => {
+  const [pageSize, setPageSize]       = useState(10);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filters = searchQuery ? { search: searchQuery } : {};
+
   const { data: companies, total, loading, error, page, setPage } =
-    usePaginatedFetch(getCompanies, {}, PAGE_SIZE);
+    usePaginatedFetch(getCompanies, filters, pageSize);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setSearchQuery(searchInput.trim());
+  };
 
   return (
     <>
+      <div className="filter-pills" style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+        <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.2rem 0.5rem' }}>
+          <Search size={14} color="var(--text-dim)" />
+          <input 
+            type="text" 
+            placeholder="Search all companies..." 
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            style={{ border: 'none', background: 'transparent', outline: 'none', color: 'var(--text-main)', fontSize: '0.85rem', padding: '0.2rem 0.5rem', width: '250px' }}
+          />
+        </form>
+
+        <span className="ms-auto d-flex align-items-center" style={{ fontSize: '0.82rem', color: 'var(--text-dim)' }}>
+          {loading ? '…' : total} total companies
+        </span>
+      </div>
+
       {error && <ErrorBanner message={error} />}
 
       <div className="glass-card">
@@ -64,7 +92,7 @@ const AllCompaniesPage = () => {
             }
           </tbody>
         </table>
-        <Pagination currentPage={page} totalItems={total} pageSize={PAGE_SIZE} onPageChange={setPage} />
+        <Pagination currentPage={page} totalItems={total} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={setPageSize} />
       </div>
     </>
   );

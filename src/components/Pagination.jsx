@@ -1,11 +1,11 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const Pagination = ({ currentPage, totalItems, pageSize, onPageChange }) => {
+const Pagination = ({ currentPage, totalItems, pageSize, onPageChange, onPageSizeChange }) => {
   const totalPages = Math.ceil(totalItems / pageSize);
-  if (totalPages <= 1) return null;
+  if (totalPages <= 1 && !onPageSizeChange) return null;
 
-  const start = (currentPage - 1) * pageSize + 1;
+  const start = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const end = Math.min(currentPage * pageSize, totalItems);
 
   const pages = [];
@@ -25,12 +25,41 @@ const Pagination = ({ currentPage, totalItems, pageSize, onPageChange }) => {
       justifyContent: 'space-between',
       padding: '1rem 2rem',
       borderTop: '1px solid var(--border-color)',
+      flexWrap: 'wrap',
+      gap: '1rem'
     }}>
-      {/* Info */}
-      <span style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>
-        Showing <strong style={{ color: 'var(--text-muted)' }}>{start}–{end}</strong> of{' '}
-        <strong style={{ color: 'var(--text-muted)' }}>{totalItems}</strong> results
-      </span>
+      {/* Info & Limit Selector */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <span style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>
+          Showing <strong style={{ color: 'var(--text-muted)' }}>{start}–{end}</strong> of{' '}
+          <strong style={{ color: 'var(--text-muted)' }}>{totalItems}</strong> results
+        </span>
+        
+        {onPageSizeChange && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>Per page:</span>
+            <select 
+              value={pageSize}
+              onChange={(e) => onPageSizeChange(Number(e.target.value))}
+              style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-main)',
+                borderRadius: '6px',
+                padding: '0.2rem 0.5rem',
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                outline: 'none'
+              }}
+            >
+              <option value={10} style={{ background: 'var(--bg-card)', color: 'var(--text-main)' }}>10</option>
+              <option value={20} style={{ background: 'var(--bg-card)', color: 'var(--text-main)' }}>20</option>
+              <option value={50} style={{ background: 'var(--bg-card)', color: 'var(--text-main)' }}>50</option>
+              <option value={100} style={{ background: 'var(--bg-card)', color: 'var(--text-main)' }}>100</option>
+            </select>
+          </div>
+        )}
+      </div>
 
       {/* Controls */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

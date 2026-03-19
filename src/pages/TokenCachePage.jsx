@@ -1,5 +1,5 @@
-import React from 'react';
-import { CheckCircle2, AlertCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { CheckCircle2, AlertCircle, Search } from 'lucide-react';
 import Pagination from '../components/Pagination';
 import { SkeletonTable, ErrorBanner, TableHead } from '../components/ui';
 import usePaginatedFetch from '../hooks/usePaginatedFetch';
@@ -18,15 +18,43 @@ const TokenBadge = ({ needsRefresh }) =>
     : <span className="token-fresh"><CheckCircle2 size={11} />Fresh</span>;
 
 const TokenCachePage = () => {
+  const [pageSize, setPageSize]       = useState(10);
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filters = searchQuery ? { search: searchQuery } : {};
+
   const { data: tokens, total, loading, error, page, setPage } =
-    usePaginatedFetch(getTokenCache, {}, PAGE_SIZE);
+    usePaginatedFetch(getTokenCache, filters, pageSize);
 
   const staleCount = tokens.filter(t =>
     t.profile_needs_refresh || t.job_needs_refresh || t.ai_needs_refresh
   ).length;
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setSearchQuery(searchInput.trim());
+  };
+
   return (
     <>
+      <div className="filter-pills" style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.2rem 0.5rem' }}>
+          <Search size={14} color="var(--text-dim)" />
+          <input 
+            type="text" 
+            placeholder="Search token cache..." 
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            style={{ border: 'none', background: 'transparent', outline: 'none', color: 'var(--text-main)', fontSize: '0.85rem', padding: '0.2rem 0.5rem', width: '250px' }}
+          />
+        </form>
+
+        <span className="ms-auto d-flex align-items-center" style={{ fontSize: '0.82rem', color: 'var(--text-dim)' }}>
+          {loading ? '…' : total} tokens
+        </span>
+      </div>
+
       {error && <ErrorBanner message={error} />}
 
       {!loading && staleCount > 0 && (
@@ -68,7 +96,7 @@ const TokenCachePage = () => {
             }
           </tbody>
         </table>
-        <Pagination currentPage={page} totalItems={total} pageSize={PAGE_SIZE} onPageChange={setPage} />
+        <Pagination currentPage={page} totalItems={total} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={setPageSize} />
       </div>
     </>
   );

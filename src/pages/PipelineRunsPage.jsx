@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CheckCircle2, Clock } from 'lucide-react';
 import Pagination from '../components/Pagination';
 import { SkeletonCards, ErrorBanner } from '../components/ui';
@@ -25,11 +25,19 @@ const STAT_META = [
 ];
 
 const PipelineRunsPage = () => {
+  const [pageSize, setPageSize] = useState(5);
+
   const { data: runs, total, loading, error, page, setPage } =
-    usePaginatedFetch(getPipelineRuns, {}, PAGE_SIZE);
+    usePaginatedFetch(getPipelineRuns, {}, pageSize);
 
   return (
     <>
+      <div className="filter-pills" style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        <span className="ms-auto d-flex align-items-center" style={{ fontSize: '0.82rem', color: 'var(--text-dim)' }}>
+          {loading ? '…' : total} pipeline runs
+        </span>
+      </div>
+
       {error && <ErrorBanner message={error} />}
 
       {loading
@@ -84,7 +92,7 @@ const PipelineRunsPage = () => {
       }
 
       <div className="glass-card">
-        <Pagination currentPage={page} totalItems={total} pageSize={PAGE_SIZE} onPageChange={setPage} />
+        <Pagination currentPage={page} totalItems={total} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={setPageSize} />
       </div>
     </>
   );

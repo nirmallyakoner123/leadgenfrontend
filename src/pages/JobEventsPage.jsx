@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CheckCircle2, XCircle } from 'lucide-react';
 import Pagination from '../components/Pagination';
 import { SkeletonTable, ErrorBanner, TableHead } from '../components/ui';
@@ -15,11 +15,19 @@ const METHOD_COLOR = {
 };
 
 const JobEventsPage = () => {
+  const [pageSize, setPageSize] = useState(10);
+
   const { data: jobs, total, loading, error, page, setPage } =
-    usePaginatedFetch(getJobEvents, {}, PAGE_SIZE);
+    usePaginatedFetch(getJobEvents, {}, pageSize);
 
   return (
     <>
+      <div className="filter-pills" style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        <span className="ms-auto d-flex align-items-center" style={{ fontSize: '0.82rem', color: 'var(--text-dim)' }}>
+          {loading ? '…' : total} job events
+        </span>
+      </div>
+
       {error && <ErrorBanner message={error} />}
       <div className="glass-card">
         <table className="page-table">
@@ -56,7 +64,7 @@ const JobEventsPage = () => {
             }
           </tbody>
         </table>
-        <Pagination currentPage={page} totalItems={total} pageSize={PAGE_SIZE} onPageChange={setPage} />
+        <Pagination currentPage={page} totalItems={total} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={setPageSize} />
       </div>
     </>
   );

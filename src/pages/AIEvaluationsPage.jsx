@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Pagination from '../components/Pagination';
 import { SkeletonTable, ErrorBanner, TableHead } from '../components/ui';
 import usePaginatedFetch from '../hooks/usePaginatedFetch';
@@ -13,11 +13,19 @@ const VERDICT_BAR   = { HOT: 'var(--accent-hot)', WARM: 'var(--accent-warm)', CO
 const CONF_COLOR    = { HIGH: '#10b981', MED: '#f59e0b', LOW: '#ef4444' };
 
 const AIEvaluationsPage = () => {
+  const [pageSize, setPageSize] = useState(10);
+
   const { data: results, total, loading, error, page, setPage } =
-    usePaginatedFetch(getAIResults, {}, PAGE_SIZE);
+    usePaginatedFetch(getAIResults, {}, pageSize);
 
   return (
     <>
+      <div className="filter-pills" style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '1rem' }}>
+        <span className="ms-auto d-flex align-items-center" style={{ fontSize: '0.82rem', color: 'var(--text-dim)' }}>
+          {loading ? '…' : total} evaluations
+        </span>
+      </div>
+
       {error && <ErrorBanner message={error} />}
       <div className="glass-card">
         <table className="page-table">
@@ -60,7 +68,7 @@ const AIEvaluationsPage = () => {
             }
           </tbody>
         </table>
-        <Pagination currentPage={page} totalItems={total} pageSize={PAGE_SIZE} onPageChange={setPage} />
+        <Pagination currentPage={page} totalItems={total} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={setPageSize} />
       </div>
     </>
   );
