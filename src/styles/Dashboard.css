@@ -1,0 +1,102 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Dashboard.css
+   ═══════════════════════════════════════════════════════════════════ */
+
+.dashboard-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-title {
+  font-size: 1.6rem;
+  margin-bottom: 0.3rem;
+}
+
+.dashboard-sub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* ── Run button ─────────────────────────────────────────────────── */
+.run-btn {
+  padding: 0.65rem 1.4rem;
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 600;
+  font-size: 0.88rem;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  white-space: nowrap;
+  transition: var(--transition);
+}
+
+.run-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+.run-btn__icon { color: var(--primary); }
+
+/* ── Stat cards ─────────────────────────────────────────────────── */
+.stat-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.stat-card__arrow { color: var(--text-dim); }
+
+.stat-card__label {
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  margin-bottom: 0.2rem;
+}
+
+.stat-card__value {
+  font-size: 1.65rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+}
+
+.stat-spinner { animation: spin 1s linear infinite; color: var(--text-dim); }
+
+/* Stat icon color variants */
+.stat-icon--primary   { color: var(--primary);   background: rgba(59,130,246,0.12); }
+.stat-icon--hot       { color: var(--accent-hot); background: rgba(239,68,68,0.12); }
+.stat-icon--warm      { color: var(--accent-warm);background: rgba(245,158,11,0.12);}
+.stat-icon--secondary { color: var(--secondary);  background: rgba(139,92,246,0.12);}
+
+/* ── Table header bar ───────────────────────────────────────────── */
+.table-header-bar {
+  padding: 1.1rem 1.75rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-header-bar__title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.table-header-bar__count {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 576px) {
+  .dashboard-title { font-size: 1.3rem; }
+  .stat-card__value { font-size: 1.35rem; }
+  .run-btn { width: 100%; justify-content: center; }
+}
