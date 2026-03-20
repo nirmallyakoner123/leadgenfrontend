@@ -4,8 +4,8 @@
  * 4-step email outreach workflow (Manual Contact Mode):
  *  Step 1: Select a Lead (top scoring leads ≥ 10/18)
  *  Step 2: Add Contacts Manually (from Apollo web UI)
- *  Step 3: Review & Approve AI-drafted Emails
- *  Step 4: Send (SMTP delivery)
+ *  Step 3: Review & Approve AI-drafted Emails (Manual Send One-by-One)
+ *  Step 4: Send Summary (SMTP stats)
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -14,7 +14,7 @@ import {
   Send, Search, Users, CheckCircle, XCircle, Loader2,
   Mail, Building2, ChevronDown, ChevronUp, Eye, Edit3,
   Zap, ArrowRight, RefreshCcw, Globe, Shield, AlertCircle,
-  Plus, Trash2, UserPlus
+  Plus, Trash2, UserPlus, ExternalLink
 } from 'lucide-react';
 import api from '../api/axiosInstance';
 import '../styles/Outreach.css';
@@ -23,8 +23,8 @@ import '../styles/Outreach.css';
 const STEPS = [
   { id: 1, label: 'Select Lead',      icon: Zap,        desc: 'Pick a top-scoring lead' },
   { id: 2, label: 'Add Contacts',     icon: UserPlus,   desc: 'Paste contacts from Apollo' },
-  { id: 3, label: 'Review Drafts',    icon: Edit3,      desc: 'Review & approve AI emails' },
-  { id: 4, label: 'Send Emails',      icon: Send,       desc: 'Deliver via SMTP' },
+  { id: 3, label: 'Review & Send',    icon: Edit3,      desc: 'Approve & Send (One-by-One)' },
+  { id: 4, label: 'Send Stats',       icon: Send,       desc: 'View outreach summary' },
 ];
 
 const EMPTY_CONTACT = { full_name: '', title: '', email: '', linkedin_url: '', seniority: '' };
@@ -44,6 +44,8 @@ const OutreachPage = () => {
   const [contacts, setContacts] = useState([]);
   const [contactsLoading, setContactsLoading] = useState(false);
   const [selectedContacts, setSelectedContacts] = useState(new Set());
+  const [apolloText, setApolloText] = useState('');
+  const [parsingApollo, setParsingApollo] = useState(false);
 
   // Step 3 state
   const [emails, setEmails] = useState([]);
@@ -53,6 +55,7 @@ const OutreachPage = () => {
   const [editingEmail, setEditingEmail] = useState(null);
   const [editSubject, setEditSubject] = useState('');
   const [editBody, setEditBody] = useState('');
+  const [sendingSingle, setSendingSingle] = useState(null); // stores email ID being sent
 
   // Step 4 state
   const [sending, setSending] = useState(false);
@@ -131,6 +134,37 @@ const OutreachPage = () => {
     setManualContacts(prev => prev.filter((_, i) => i !== index));
   };
 
+  // ── Parse Apollo Text ───────────────────────────────────────────
+  const handleParseApollo = async () => {
+    if (!apolloText.trim() || !selectedLead) return;
+    setParsingApollo(true);
+    try {
+      const resp = await api.post('/outreach/parse-apollo', {
+        raw_text: apolloText,
+        company_name: selectedLead.name_display
+      });
+      if (resp.data?.success && resp.data?.contacts) {
+        const newContacts = resp.data.contacts.map(c => ({
+          ...EMPTY_CONTACT,
+          full_name: c.full_name || '',
+          title: c.title || '',
+          is_target: c.is_target,
+          ai_reasoning: c.ai_reasoning
+        }));
+        
+        // Remove completely empty rows from existing
+        const validExisting = manualContacts.filter(c => c.full_name.trim() || c.email.trim() || c.title.trim());
+        setManualContacts([...newContacts, ...validExisting]);
+        setApolloText('');
+      }
+    } catch (e) {
+      console.error('Failed to parse apollo text', e);
+      alert('Failed to parse: ' + (e.response?.data?.detail || e.message));
+    } finally {
+      setParsingApollo(false);
+    }
+  };
+
   // ── Submit Manual Contacts ──────────────────────────────────────
   const handleAddContacts = async () => {
     if (!selectedLead) return;
@@ -172,6 +206,25 @@ const OutreachPage = () => {
     }
   };
 
+  // ── Send Single ─────────────────────────────────────────────────
+  const handleSendSingle = async (emailId) => {
+    setSendingSingle(emailId);
+    try {
+      const resp = await api.post(`/outreach/send-single/${emailId}`);
+      if (resp.data.success) {
+        loadEmails();
+        loadStats();
+      } else {
+        alert("Send failed: " + resp.data.message);
+      }
+    } catch (e) {
+      console.error('Send failed', e);
+      alert("Error sending email: " + (e.response?.data?.detail || e.message));
+    } finally {
+      setSendingSingle(null);
+    }
+  };
+
   // ── Approve / Reject ───────────────────────────────────────────
   const handleEmailAction = async (emailId, action) => {
     try {
@@ -190,7 +243,7 @@ const OutreachPage = () => {
   };
 
   // ── Send ────────────────────────────────────────────────────────
-  const handleSend = async () => {
+  const handleSendAll = async () => {
     setSending(true);
     setSendResult(null);
     try {
@@ -248,7 +301,7 @@ const OutreachPage = () => {
           <h1 className="outreach-title">
             <Mail size={24} /> Email Outreach
           </h1>
-          <p className="outreach-subtitle">Find decision makers in Apollo, add contacts, draft AI emails, and send.</p>
+          <p className="outreach-subtitle">Manual decision-maker hunting with AI personal drafting.</p>
         </div>
       </div>
 
@@ -419,18 +472,38 @@ const OutreachPage = () => {
                 </div>
               ) : (
                 <>
-                  {/* Manual Entry Form */}
                   <div className="manual-entry-section glass-card">
                     <div className="manual-entry-header">
                       <h3 className="manual-entry-title"><UserPlus size={16} /> Paste Contacts from Apollo</h3>
                       <p className="manual-entry-desc">
-                        Search for <strong>{selectedLead.name_display}</strong> in Apollo's web app, find decision makers (CEO, Founder, Head of HR, etc.), and paste their info below.
+                        Search for <strong>{selectedLead.name_display}</strong> in Apollo's web app, select people, copy all text (Ctrl+C), and let AI extract them.
                       </p>
+                    </div>
+
+                    <div className="ai-paste-section">
+                      <textarea
+                        className="ai-paste-textarea"
+                        rows={5}
+                        placeholder="Paste raw text copied from Apollo here..."
+                        value={apolloText}
+                        onChange={(e) => setApolloText(e.target.value)}
+                      />
+                      <button 
+                        className="outreach-btn outreach-btn-primary ai-paste-btn" 
+                        disabled={parsingApollo || !apolloText.trim()}
+                        onClick={handleParseApollo}
+                      >
+                        {parsingApollo ? (
+                          <><Loader2 size={14} className="spin" /> Analyzing...</>
+                        ) : (
+                          <><Zap size={14} /> Analyze with AI</>
+                        )}
+                      </button>
                     </div>
 
                     <div className="manual-contacts-form">
                       {manualContacts.map((c, i) => (
-                        <div key={i} className="manual-contact-row">
+                        <div key={i} className={`manual-contact-row ${c.is_target === true ? 'is-target' : c.is_target === false ? 'not-target' : ''}`}>
                           <div className="mcr-fields">
                             <input
                               type="text"
@@ -474,6 +547,13 @@ const OutreachPage = () => {
                               <option value="senior">Senior</option>
                             </select>
                           </div>
+                          
+                          {c.ai_reasoning && (
+                            <div className="mcr-ai-reasoning">
+                              <Zap size={12} /> <strong>{c.is_target ? 'Recommended Target:' : 'Skip:'}</strong> {c.ai_reasoning}
+                            </div>
+                          )}
+
                           {manualContacts.length > 1 && (
                             <button className="mcr-remove" onClick={() => removeRow(i)} title="Remove">
                               <Trash2 size={14} />
@@ -501,7 +581,6 @@ const OutreachPage = () => {
                     </div>
                   </div>
 
-                  {/* Existing Contacts Table */}
                   <div className="step-toolbar" style={{ marginTop: '1.5rem' }}>
                     <div className="step-toolbar-left">
                       <h3 className="step-title" style={{ fontSize: '1rem' }}>Saved Contacts</h3>
@@ -537,7 +616,7 @@ const OutreachPage = () => {
                   ) : contacts.length === 0 ? (
                     <div className="outreach-empty" style={{ padding: '1.5rem 0' }}>
                       <Users size={24} />
-                      <p>No contacts saved yet. Add them using the form above.</p>
+                      <p>No contacts saved yet. Add them above.</p>
                     </div>
                   ) : (
                     <div className="outreach-table-wrap glass-card">
@@ -572,7 +651,7 @@ const OutreachPage = () => {
                                 {c.linkedin_url && (
                                   <a href={c.linkedin_url} target="_blank" rel="noreferrer" className="linkedin-link"
                                     onClick={(e) => e.stopPropagation()}>
-                                    LinkedIn ↗
+                                    <ExternalLink size={10} /> LinkedIn
                                   </a>
                                 )}
                               </td>
@@ -595,17 +674,17 @@ const OutreachPage = () => {
             </div>
           )}
 
-          {/* ────────── STEP 3: REVIEW DRAFTS ────────── */}
+          {/* ────────── STEP 3: REVIEW & SEND ONE BY ONE ────────── */}
           {step === 3 && (
             <div>
               <div className="step-toolbar">
                 <div className="step-toolbar-left">
-                  <h2 className="step-title">Email Drafts</h2>
+                  <h2 className="step-title">Review & Manual Send</h2>
                   <span className="step-count">{emails.length} emails</span>
                 </div>
                 <div className="step-toolbar-right">
                   <button className="outreach-btn outreach-btn-ghost" onClick={() => setStep(2)}>
-                    ← Back to Contacts
+                    ← Add More Contacts
                   </button>
                   <button className="outreach-btn outreach-btn-ghost" onClick={loadEmails}>
                     <RefreshCcw size={14} /> Refresh
@@ -618,7 +697,7 @@ const OutreachPage = () => {
               ) : emails.length === 0 ? (
                 <div className="outreach-empty">
                   <Mail size={32} />
-                  <p>No email drafts yet. Select contacts and draft emails first.</p>
+                  <p>No email drafts yet.</p>
                   <button className="outreach-btn outreach-btn-ghost" onClick={() => setStep(2)}>
                     ← Go to Contacts
                   </button>
@@ -628,6 +707,7 @@ const OutreachPage = () => {
                   {emails.map(email => {
                     const isExpanded = expandedEmail === email.id;
                     const isEditing = editingEmail === email.id;
+                    const isSending = sendingSingle === email.id;
 
                     return (
                       <div key={email.id} className={`email-draft-card glass-card ${email.status}`}>
@@ -690,40 +770,64 @@ const OutreachPage = () => {
                                 </div>
                               )}
 
-                              {email.status === 'draft' && (
-                                <div className="email-draft-actions">
-                                  {!isEditing ? (
-                                    <>
-                                      <button className="outreach-btn outreach-btn-success" onClick={() => handleEmailAction(email.id, 'approve')}>
-                                        <CheckCircle size={14} /> Approve
-                                      </button>
-                                      <button className="outreach-btn outreach-btn-ghost" onClick={() => {
-                                        setEditingEmail(email.id);
-                                        setEditSubject(email.edited_subject || email.subject);
-                                        setEditBody(email.edited_body || email.body);
-                                      }}>
-                                        <Edit3 size={14} /> Edit & Approve
-                                      </button>
-                                      <button className="outreach-btn outreach-btn-danger" onClick={() => handleEmailAction(email.id, 'reject')}>
-                                        <XCircle size={14} /> Reject
-                                      </button>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <button className="outreach-btn outreach-btn-success" onClick={() => handleEmailAction(email.id, 'approve')}>
-                                        <CheckCircle size={14} /> Save & Approve
-                                      </button>
-                                      <button className="outreach-btn outreach-btn-ghost" onClick={() => setEditingEmail(null)}>
-                                        Cancel
-                                      </button>
-                                    </>
-                                  )}
-                                </div>
-                              )}
+                              <div className="email-draft-actions">
+                                {email.status === 'draft' && !isEditing && (
+                                  <>
+                                    <button className="outreach-btn outreach-btn-success" onClick={() => handleEmailAction(email.id, 'approve')}>
+                                      <CheckCircle size={14} /> Approve
+                                    </button>
+                                    <button className="outreach-btn outreach-btn-ghost" onClick={() => {
+                                      setEditingEmail(email.id);
+                                      setEditSubject(email.edited_subject || email.subject);
+                                      setEditBody(email.edited_body || email.body);
+                                    }}>
+                                      <Edit3 size={14} /> Edit & Approve
+                                    </button>
+                                    <button className="outreach-btn outreach-btn-danger" onClick={() => handleEmailAction(email.id, 'reject')}>
+                                      <XCircle size={14} /> Reject
+                                    </button>
+                                  </>
+                                )}
 
-                              {email.status === 'sent' && email.sent_at && (
+                                {email.status === 'approved' && !isEditing && (
+                                  <>
+                                    <button 
+                                      className="outreach-btn outreach-btn-send" 
+                                      disabled={isSending}
+                                      onClick={() => handleSendSingle(email.id)}
+                                    >
+                                      {isSending ? <Loader2 size={14} className="spin" /> : <Send size={14} />}
+                                      {isSending ? 'Sending...' : 'Send Now'}
+                                    </button>
+                                    <button className="outreach-btn outreach-btn-ghost" onClick={() => {
+                                      setEditingEmail(email.id);
+                                      setEditSubject(email.edited_subject || email.subject);
+                                      setEditBody(email.edited_body || email.body);
+                                    }}>
+                                      Edit Again
+                                    </button>
+                                    <button className="outreach-btn outreach-btn-danger" onClick={() => handleEmailAction(email.id, 'reject')}>
+                                      Reject
+                                    </button>
+                                  </>
+                                )}
+
+                                {isEditing && (
+                                  <>
+                                    <button className="outreach-btn outreach-btn-success" onClick={() => handleEmailAction(email.id, 'approve')}>
+                                      <CheckCircle size={14} /> Save & Approve
+                                    </button>
+                                    <button className="outreach-btn outreach-btn-ghost" onClick={() => setEditingEmail(null)}>
+                                      Cancel
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+
+                              {(email.status === 'sent' || email.smtp_response) && (
                                 <div className="email-sent-info">
-                                  <CheckCircle size={13} /> Sent on {new Date(email.sent_at).toLocaleString()}
+                                  {email.status === 'sent' ? <CheckCircle size={13} /> : <AlertCircle size={13} />}
+                                  {email.status === 'sent' ? `Sent on ${new Date(email.sent_at).toLocaleString()}` : `Error: ${email.smtp_response}`}
                                 </div>
                               )}
                             </motion.div>
@@ -737,71 +841,37 @@ const OutreachPage = () => {
             </div>
           )}
 
-          {/* ────────── STEP 4: SEND ────────── */}
+          {/* ────────── STEP 4: STATS SUMMARY ────────── */}
           {step === 4 && (
             <div>
               <div className="step-toolbar">
-                <div className="step-toolbar-left">
-                  <h2 className="step-title">Send Approved Emails</h2>
-                </div>
-                <div className="step-toolbar-right">
-                  <button className="outreach-btn outreach-btn-ghost" onClick={() => setStep(3)}>
-                    ← Back to Drafts
-                  </button>
-                </div>
+                <h2 className="step-title">Outreach Stats Summary</h2>
               </div>
 
               <div className="send-section glass-card">
                 <div className="send-summary">
                   <div className="send-summary-item">
-                    <div className="send-summary-value">{stats?.approved || 0}</div>
-                    <div className="send-summary-label">Approved & Ready</div>
+                    <div className="send-summary-value" style={{ color: '#10b981' }}>{stats?.sent || 0}</div>
+                    <div className="send-summary-label">Total Sent</div>
                   </div>
-                  <ArrowRight size={24} className="send-arrow" />
                   <div className="send-summary-item">
-                    <div className="send-summary-value">{stats?.sent || 0}</div>
-                    <div className="send-summary-label">Already Sent</div>
+                    <div className="send-summary-value" style={{ color: 'var(--accent-warm)' }}>{stats?.approved || 0}</div>
+                    <div className="send-summary-label">Pending Approval</div>
+                  </div>
+                  <div className="send-summary-item">
+                    <div className="send-summary-value">{stats?.total_contacts || 0}</div>
+                    <div className="send-summary-label">Total Contacts</div>
                   </div>
                 </div>
 
-                {(stats?.approved || 0) === 0 ? (
-                  <div className="outreach-empty" style={{ padding: '2rem 0' }}>
-                    <Mail size={28} />
-                    <p>No approved emails to send. Review and approve drafts first.</p>
-                    <button className="outreach-btn outreach-btn-ghost" onClick={() => setStep(3)}>
-                      ← Review Drafts
-                    </button>
-                  </div>
-                ) : (
-                  <div className="send-action">
-                    <button
-                      className="outreach-btn outreach-btn-send"
-                      disabled={sending}
-                      onClick={handleSend}
-                    >
-                      {sending ? (
-                        <><Loader2 size={16} className="spin" /> Sending...</>
-                      ) : (
-                        <><Send size={16} /> Send {stats?.approved} Emails Now</>
-                      )}
-                    </button>
-                    <p className="send-warning">
-                      <AlertCircle size={13} /> This will send emails via SMTP. Cannot be undone.
-                    </p>
-                  </div>
-                )}
-
-                {sendResult && (
-                  <div className={`send-result ${sendResult.sent > 0 ? 'success' : 'error'}`}>
-                    <p>{sendResult.message}</p>
-                    {sendResult.sent !== undefined && (
-                      <div className="send-result-stats">
-                        <span className="sent-count">✅ {sendResult.sent} sent</span>
-                        <span className="failed-count">❌ {sendResult.failed} failed</span>
-                      </div>
-                    )}
-                  </div>
-                )}
+                <div className="stats-next-steps">
+                  <button className="outreach-btn outreach-btn-ghost" onClick={() => setStep(1)}>
+                    <Zap size={14} /> Go Target More Leads
+                  </button>
+                  <button className="outreach-btn outreach-btn-ghost" onClick={() => setStep(3)}>
+                    <Edit3 size={14} /> Review More Drafts
+                  </button>
+                </div>
               </div>
             </div>
           )}
