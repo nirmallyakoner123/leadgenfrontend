@@ -1,0 +1,780 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Outreach.css — Email Outreach Dashboard Styles
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Page Header ────────────────────────────────────────────────── */
+.outreach-page { max-width: 1200px; margin: 0 auto; }
+
+.outreach-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.outreach-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.outreach-subtitle {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+}
+
+/* ── Stats Row ──────────────────────────────────────────────────── */
+.outreach-stats-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.outreach-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-align: center;
+  transition: var(--transition);
+}
+
+.outreach-stat-card:hover {
+  background: var(--bg-card-hover);
+  transform: translateY(-1px);
+}
+
+.outreach-stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.outreach-stat-label {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 0.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+/* ── Stepper ────────────────────────────────────────────────────── */
+.outreach-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 2rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+}
+
+.stepper-step {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: none;
+  border: none;
+  padding: 0.6rem 0.85rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.stepper-step:hover {
+  background: var(--bg-card-hover);
+}
+
+.stepper-step.active {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.stepper-step.active .stepper-icon {
+  background: var(--primary);
+  color: #fff;
+}
+
+.stepper-step.past .stepper-icon {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.stepper-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  color: var(--text-dim);
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+
+.stepper-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.stepper-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.stepper-desc {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+.stepper-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border-color);
+  min-width: 20px;
+}
+
+.stepper-line.past {
+  background: rgba(16, 185, 129, 0.3);
+}
+
+/* ── Step content ───────────────────────────────────────────────── */
+.outreach-step-content {
+  min-height: 400px;
+}
+
+/* ── Toolbar ────────────────────────────────────────────────────── */
+.step-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.step-toolbar-left {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.step-toolbar-right {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.step-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.step-count {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 0.15rem 0.55rem;
+  border-radius: 10px;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────── */
+.outreach-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.outreach-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.outreach-btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.outreach-btn-primary:hover:not(:disabled) {
+  background: #2563eb;
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.3);
+}
+
+.outreach-btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+}
+
+.outreach-btn-ghost:hover {
+  background: var(--bg-card);
+  color: var(--text-main);
+}
+
+.outreach-btn-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.outreach-btn-success:hover {
+  background: rgba(16, 185, 129, 0.25);
+}
+
+.outreach-btn-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--accent-hot);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.outreach-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.outreach-btn-send {
+  background: linear-gradient(135deg, var(--primary), #8b5cf6);
+  color: #fff;
+  padding: 0.85rem 2rem;
+  font-size: 0.95rem;
+  border-radius: 12px;
+}
+
+.outreach-btn-send:hover:not(:disabled) {
+  box-shadow: 0 0 28px rgba(59, 130, 246, 0.35);
+  transform: translateY(-1px);
+}
+
+/* ── Loading / empty states ─────────────────────────────────────── */
+.outreach-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 3rem;
+  color: var(--text-dim);
+  font-size: 0.88rem;
+}
+
+.outreach-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 3rem;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.outreach-empty p { font-size: 0.88rem; }
+
+/* ── Spinner ────────────────────────────────────────────────────── */
+.spin { animation: spin 1s linear infinite; }
+
+/* ── Table Enhancements ─────────────────────────────────────────── */
+.outreach-table-wrap {
+  border-radius: var(--radius-lg);
+}
+
+.outreach-table { min-width: 650px; }
+
+.outreach-checkbox {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.row-selected {
+  background: rgba(59, 130, 246, 0.06) !important;
+}
+
+.lead-name {
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.lead-sub {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  margin-top: 0.1rem;
+}
+
+.score-badge {
+  display: inline-block;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  padding: 0.15rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.loc-text {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.contact-found-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+}
+
+.contact-pending-badge {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+/* ── Contact extras ─────────────────────────────────────────────── */
+.linkedin-link {
+  font-size: 0.7rem;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.linkedin-link:hover { text-decoration: underline; }
+
+.email-text {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-family: monospace;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 1px solid;
+  text-transform: capitalize;
+}
+
+.seniority-text {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+/* ── Email Draft Cards ──────────────────────────────────────────── */
+.email-drafts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.email-draft-card {
+  padding: 0;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.email-draft-card:hover {
+  border-color: var(--glass-border);
+}
+
+.email-draft-card.approved {
+  border-left: 3px solid var(--primary);
+}
+
+.email-draft-card.sent {
+  border-left: 3px solid #10b981;
+}
+
+.email-draft-card.rejected {
+  border-left: 3px solid var(--accent-hot);
+  opacity: 0.6;
+}
+
+.email-draft-header {
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.email-draft-header:hover {
+  background: var(--bg-card-hover);
+}
+
+.email-draft-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.email-draft-to {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.email-draft-title-text {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.email-draft-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.email-draft-subject-preview {
+  padding: 0 1.25rem 0.5rem;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* ── Draft body / expanded ──────────────────────────────────────── */
+.email-draft-body-wrap {
+  overflow: hidden;
+  border-top: 1px solid var(--border-color);
+}
+
+.email-draft-body {
+  padding: 1.25rem;
+}
+
+.email-to-line {
+  font-size: 0.82rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-muted);
+}
+
+.email-body-text {
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  color: var(--text-main);
+  background: var(--bg-main);
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+.email-draft-actions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem 1.25rem;
+  flex-wrap: wrap;
+}
+
+.email-sent-info {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.75rem 1.25rem 1.25rem;
+  font-size: 0.82rem;
+  color: #10b981;
+}
+
+/* ── Edit form ──────────────────────────────────────────────────── */
+.email-edit-form {
+  padding: 1.25rem;
+}
+
+.edit-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  margin-bottom: 0.3rem;
+}
+
+.edit-input {
+  width: 100%;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.6rem 0.85rem;
+  color: var(--text-main);
+  font-size: 0.88rem;
+  font-family: var(--font-sans);
+  margin-bottom: 0.85rem;
+  transition: var(--transition);
+}
+
+.edit-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.edit-textarea {
+  width: 100%;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.75rem;
+  color: var(--text-main);
+  font-size: 0.88rem;
+  font-family: var(--font-sans);
+  line-height: 1.6;
+  resize: vertical;
+  transition: var(--transition);
+}
+
+.edit-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* ── Send Section ───────────────────────────────────────────────── */
+.send-section {
+  padding: 2rem;
+}
+
+.send-summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.send-summary-item { text-align: center; }
+
+.send-summary-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.send-summary-label {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+.send-arrow {
+  color: var(--text-dim);
+}
+
+.send-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.send-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: var(--accent-warm);
+}
+
+/* ── Send result ────────────────────────────────────────────────── */
+.send-result {
+  margin-top: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+}
+
+.send-result.success {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.send-result.error {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--accent-hot);
+}
+
+.send-result-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+/* ── Manual Contact Entry Form ──────────────────────────────────── */
+.manual-entry-section {
+  padding: 1.5rem;
+}
+
+.manual-entry-header {
+  margin-bottom: 1.25rem;
+}
+
+.manual-entry-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+}
+
+.manual-entry-desc {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.manual-contacts-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.manual-contact-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.mcr-fields {
+  display: grid;
+  grid-template-columns: 1.2fr 1.4fr 1fr 1.2fr 0.7fr;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.mcr-input {
+  width: 100%;
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.55rem 0.75rem;
+  color: var(--text-main);
+  font-size: 0.82rem;
+  font-family: var(--font-sans);
+  transition: var(--transition);
+}
+
+.mcr-input::placeholder {
+  color: var(--text-dim);
+  opacity: 0.6;
+}
+
+.mcr-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.mcr-select {
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 1.5rem;
+}
+
+.mcr-remove {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--accent-hot);
+  border-radius: 6px;
+  padding: 0.55rem;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.mcr-remove:hover {
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.manual-form-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .outreach-stats-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .outreach-stepper {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+
+  .mcr-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .stepper-line {
+    width: 1px;
+    min-height: 12px;
+    min-width: unset;
+    align-self: center;
+  }
+
+  .step-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .send-summary {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .send-arrow {
+    transform: rotate(90deg);
+  }
+}
+
+@media (max-width: 480px) {
+  .outreach-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

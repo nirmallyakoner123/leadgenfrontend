@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Zap, Users, Building2, Inbox,
   Briefcase, BrainCircuit, RefreshCcw, Database,
-  Settings, HelpCircle, ChevronRight, ChevronLeft
+  Settings, HelpCircle, ChevronRight, ChevronLeft, Mail
 } from 'lucide-react';
 import '../styles/Sidebar.css';
 
@@ -14,6 +14,7 @@ const NAV_GROUPS = [
       { to: '/',                icon: LayoutDashboard, label: 'Dashboard' },
       { to: '/active-leads',    icon: Zap,             label: 'Active Leads' },
       { to: '/high-intent',     icon: Users,           label: 'High Intent' },
+      { to: '/outreach',        icon: Mail,            label: 'Email Outreach' },
     ],
   },
   {

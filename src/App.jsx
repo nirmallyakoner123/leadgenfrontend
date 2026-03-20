@@ -14,6 +14,7 @@ import JobEventsPage    from './pages/JobEventsPage';
 import AIEvaluationsPage from './pages/AIEvaluationsPage';
 import PipelineRunsPage from './pages/PipelineRunsPage';
 import TokenCachePage   from './pages/TokenCachePage';
+import OutreachPage     from './pages/OutreachPage';
 
 import './App.css';
 
@@ -65,6 +66,7 @@ function App() {
                     <Route path="/" element={<PageWrapper><DashboardPage /></PageWrapper>} />
                     <Route path="/active-leads" element={<PageWrapper><ActiveLeadsPage /></PageWrapper>} />
                     <Route path="/high-intent" element={<PageWrapper><HighIntentPage /></PageWrapper>} />
+                    <Route path="/outreach" element={<PageWrapper><OutreachPage /></PageWrapper>} />
                     <Route path="/companies" element={<PageWrapper><AllCompaniesPage /></PageWrapper>} />
                     <Route path="/raw-scrapes" element={<PageWrapper><RawScrapesPage /></PageWrapper>} />
                     <Route path="/job-events" element={<PageWrapper><JobEventsPage /></PageWrapper>} />
