@@ -1,105 +1,135 @@
 /**
  * ui.jsx — Shared UI primitives
  * ─────────────────────────────────────────────────────────────────
- * KEY RULES:
- *  • SkeletonTable   → renders ONLY <tr> elements (no <table> wrapper)
- *                      Place it directly inside <tbody> in your page table.
- *  • TableHead       → renders <colgroup> + <thead> together.
- *                      The same widths array drives both real headers AND skeletons.
- *  • SkeletonCards   → renders full card blocks for non-table pages (Pipeline Runs).
- *  • ErrorBanner     → consistent API error display.
- * All styling is in App.css (class-based — no inline styles here).
+ * Refactored to use Material UI components while maintaining the 
+ * original structural patterns for easy integration.
  */
 
 import React from 'react';
-
-// ═══════════════════════════════════════════════════════════════════
-// TABLE PRIMITIVES
-// ═══════════════════════════════════════════════════════════════════
+import { 
+  Box, 
+  Typography, 
+  TableHead as MuiTableHead, 
+  TableRow, 
+  TableCell, 
+  Skeleton,
+  Alert,
+  AlertTitle,
+  Card,
+  Grid
+} from '@mui/material';
 
 /**
- * TableHead — colgroup + thead row.
+ * TableHead — MUI-based thead row.
  * @param {string[]} columns  — display labels
  * @param {string[]} widths   — col widths e.g. ['35%','12%','10%','15%','28%']
  */
 export const TableHead = ({ columns, widths = [] }) => (
-  <>
-    {widths.length > 0 && (
-      <colgroup>
-        {widths.map((w, i) => <col key={i} style={{ width: w }} />)}
-      </colgroup>
-    )}
-    <thead>
-      <tr>
-        {columns.map((col, i) => (
-          <th key={i} className={`th-cell ${i === 0 ? 'th-cell-first' : ''}`}>{col}</th>
-        ))}
-      </tr>
-    </thead>
-  </>
+  <MuiTableHead>
+    <TableRow sx={{ bgcolor: 'rgba(255, 255, 255, 0.02)' }}>
+      {columns.map((col, i) => (
+        <TableCell 
+          key={i} 
+          sx={{ 
+            fontWeight: 700, 
+            color: 'text.secondary', 
+            fontSize: '0.75rem',
+            width: widths[i],
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+            py: 1.5,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em'
+          }}
+        >
+          {col}
+        </TableCell>
+      ))}
+    </TableRow>
+  </MuiTableHead>
 );
 
 /**
- * SkeletonTable — renders <tr> rows ONLY (no <table> wrapper).
- * Must be placed directly inside a <tbody> that is already inside a <table>.
- * The widths should match exactly the widths passed to TableHead for the same table.
+ * SkeletonTable — renders MUI TableRow + TableCell with Skeleton.
+ * Must be placed directly inside a TableBody.
  *
- * @param {string[]} colWidths — column widths (must match TableHead widths)
+ * @param {string[]} colWidths — column widths
  * @param {number}   rows      — number of skeleton rows
  */
 export const SkeletonTable = ({ colWidths = [], rows = 10 }) => (
   <>
     {Array.from({ length: rows }, (_, r) => (
-      <tr key={r} className="table-row">
-        {colWidths.map((_, c) => (
-          <td key={c} className={`td-cell ${c === 0 ? 'td-cell-first' : ''}`}>
-            {/* Randomise each cell width slightly so it looks organic */}
-            <div
-              className="skeleton-cell"
-              style={{ width: `${55 + ((r * 7 + c * 13) % 38)}%` }}
+      <TableRow key={r} sx={{ '& td': { borderBottom: '1px solid', borderColor: 'divider' } }}>
+        {colWidths.map((w, c) => (
+          <TableCell key={c} sx={{ width: w, py: 2 }}>
+            <Skeleton 
+              variant="text" 
+              width={`${55 + ((r * 7 + c * 13) % 38)}%`} 
+              height={20} 
+              sx={{ bgcolor: 'rgba(255, 255, 255, 0.05)', borderRadius: 1 }}
             />
-          </td>
+          </TableCell>
         ))}
-      </tr>
+      </TableRow>
     ))}
   </>
 );
 
-// ═══════════════════════════════════════════════════════════════════
-// CARD SKELETON (Pipeline Runs page)
-// ═══════════════════════════════════════════════════════════════════
-
+/**
+ * SkeletonCards — renders full card blocks for non-table pages.
+ */
 export const SkeletonCards = ({ cards = 5 }) => (
-  <div className="skeleton-cards">
+  <Grid container spacing={3}>
     {Array.from({ length: cards }, (_, i) => (
-      <div key={i} className="glass-card skeleton-card-item">
-        <div className="skeleton-cell skeleton-cell--title" />
-        <div className="skeleton-cell skeleton-cell--sub"   />
-        <div className="skeleton-stat-grid">
-          {Array.from({ length: 6 }, (_, j) => (
-            <div key={j} className="skeleton-stat-box">
-              <div className="skeleton-cell skeleton-cell--num"   />
-              <div className="skeleton-cell skeleton-cell--label" />
-            </div>
-          ))}
-        </div>
-      </div>
+      <Grid item xs={12} key={i}>
+        <Card 
+          variant="outlined" 
+          sx={{ 
+            p: 3, 
+            borderRadius: 3, 
+            bgcolor: 'background.paper', 
+            backgroundImage: 'none', 
+            borderColor: 'divider' 
+          }}
+        >
+          <Skeleton variant="text" width="40%" height={32} sx={{ mb: 1, bgcolor: 'rgba(255, 255, 255, 0.05)' }} />
+          <Skeleton variant="text" width="20%" height={20} sx={{ mb: 3, bgcolor: 'rgba(255, 255, 255, 0.03)' }} />
+          <Grid container spacing={2}>
+            {Array.from({ length: 6 }, (_, j) => (
+              <Grid item xs={4} sm={2} key={j}>
+                <Box sx={{ p: 2, borderRadius: 2, bgcolor: 'rgba(255, 255, 255, 0.02)', textAlign: 'center', border: '1px solid', borderColor: 'divider' }}>
+                  <Skeleton variant="text" width="60%" height={24} sx={{ mx: 'auto', mb: 0.5, bgcolor: 'rgba(255, 255, 255, 0.05)' }} />
+                  <Skeleton variant="text" width="80%" height={16} sx={{ mx: 'auto', bgcolor: 'rgba(255, 255, 255, 0.03)' }} />
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </Card>
+      </Grid>
     ))}
-  </div>
+  </Grid>
 );
 
-// ═══════════════════════════════════════════════════════════════════
-// ERROR BANNER
-// ═══════════════════════════════════════════════════════════════════
-
+/**
+ * ErrorBanner — consistent API error display using MUI Alert.
+ */
 export const ErrorBanner = ({ message }) => (
-  <div className="error-banner">
-    <span className="error-banner__icon">⚠</span>
-    <div>
-      <strong>API Error</strong> — {message}
-      <div className="error-banner__hint">Ensure the FastAPI backend is running on port 8000.</div>
-    </div>
-  </div>
+  <Alert 
+    severity="error" 
+    variant="outlined"
+    sx={{ 
+      mb: 3, 
+      borderRadius: 2, 
+      bgcolor: 'rgba(211, 47, 47, 0.05)', 
+      borderColor: 'rgba(211, 47, 47, 0.2)',
+      color: '#ffcdd2',
+      '& .MuiAlert-icon': { color: '#ef5350' }
+    }}
+  >
+    <AlertTitle sx={{ fontWeight: 700 }}>API Error</AlertTitle>
+    {message} — <Typography variant="caption" component="span" sx={{ opacity: 0.8 }}>Ensure the FastAPI backend is running on port 8000.</Typography>
+  </Alert>
 );
 
 export default SkeletonTable;
+

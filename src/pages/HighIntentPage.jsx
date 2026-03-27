@@ -1,4 +1,11 @@
 import React, { useState } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Paper, 
+  Chip,
+  Stack
+} from '@mui/material';
 import { AnimatePresence } from 'framer-motion';
 import LeadTable from '../components/LeadTable';
 import LeadDetails from '../components/LeadDetails';
@@ -8,8 +15,6 @@ import usePaginatedFetch from '../hooks/usePaginatedFetch';
 import { getLeads } from '../api/services';
 
 const PAGE_SIZE     = 10;
-const COL_WIDTHS    = ['35%', '12%', '10%', '10%', '10%', '23%'];
-const HEADER_LABELS = ['COMPANY', 'INDUSTRY', 'LOCATION', 'SCORE', 'VERDICT', 'ACTION'];
 
 const HighIntentPage = () => {
   const [selectedLead, setSelectedLead] = useState(null);
@@ -23,38 +28,43 @@ const HighIntentPage = () => {
   );
 
   return (
-    <>
-      {error && <ErrorBanner message={error} />}
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" fontWeight="700">High Intent Leads</Typography>
+        <Stack direction="row" spacing={1} alignItems="center">
+           <Chip 
+            label={`${loading ? '…' : highIntent.length} ATS-Confirmed`}
+            color="error"
+            size="small"
+            sx={{ fontWeight: 700, borderRadius: 1.5, bgcolor: 'rgba(211, 47, 47, 0.1)', color: 'error.main' }}
+          />
+          <Typography variant="body2" color="text.secondary">
+            {loading ? '…' : total} total leads
+          </Typography>
+        </Stack>
+      </Box>
 
-      <div className="glass-card" style={{ overflow: 'hidden' }}>
-        <div className="table-header-bar">
-          <div className="d-flex align-items-center gap-2">
-            <span className="badge bg-danger bg-opacity-10 text-danger px-3" style={{ borderRadius: '20px', fontSize: '0.77rem', fontWeight: 700 }}>
-              {loading ? '…' : highIntent.length} ATS-Confirmed
-            </span>
-            <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 400 }}>on this page</span>
-          </div>
-          <span className="table-header-bar__count">{loading ? '…' : total} total leads</span>
-        </div>
+      {error && <Box sx={{ mb: 2 }}><ErrorBanner message={error} /></Box>}
 
-        {loading ? (
-          <table className="page-table">
-            <colgroup>{COL_WIDTHS.map((w, i) => <col key={i} style={{ width: w }} />)}</colgroup>
-            <thead>
-              <tr>{HEADER_LABELS.map((h, i) => <th key={i} className={`th-cell ${i === 0 ? 'th-cell-first' : ''}`}>{h}</th>)}</tr>
-            </thead>
-            <tbody><SkeletonTable colWidths={COL_WIDTHS} rows={PAGE_SIZE} /></tbody>
-          </table>
-        ) : (
-          <LeadTable leads={highIntent} onSelectLead={setSelectedLead} />
-        )}
-        <Pagination currentPage={page} totalItems={total} pageSize={PAGE_SIZE} onPageChange={setPage} />
-      </div>
+      <Paper sx={{ borderRadius: 3, overflow: 'hidden', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+        <Box sx={{ overflowX: 'auto' }}>
+          {loading ? (
+             <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">Loading leads...</Typography>
+            </Box>
+          ) : (
+            <LeadTable leads={highIntent} onSelectLead={setSelectedLead} />
+          )}
+        </Box>
+        <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Pagination currentPage={page} totalItems={total} pageSize={PAGE_SIZE} onPageChange={setPage} />
+        </Box>
+      </Paper>
 
       <AnimatePresence>
         {selectedLead && <LeadDetails lead={selectedLead} onClose={() => setSelectedLead(null)} />}
       </AnimatePresence>
-    </>
+    </Box>
   );
 };
 

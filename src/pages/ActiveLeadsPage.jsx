@@ -1,4 +1,15 @@
 import React, { useState } from 'react';
+import { 
+  Box, 
+  Typography, 
+  Paper, 
+  Tabs, 
+  Tab, 
+  TextField, 
+  InputAdornment, 
+  Chip,
+  Container
+} from '@mui/material';
 import { Search } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import LeadTable from '../components/LeadTable';
@@ -9,8 +20,6 @@ import usePaginatedFetch from '../hooks/usePaginatedFetch';
 import { getLeads } from '../api/services';
 
 const PAGE_SIZE      = 10;
-const COL_WIDTHS     = ['35%', '12%', '10%', '10%', '10%', '23%'];
-const HEADER_LABELS  = ['COMPANY', 'INDUSTRY', 'LOCATION', 'SCORE', 'VERDICT', 'ACTION'];
 const FILTERS        = ['ALL', 'HOT', 'WARM', 'COLD'];
 
 const ActiveLeadsPage = () => {
@@ -33,67 +42,80 @@ const ActiveLeadsPage = () => {
     setSearchQuery(searchInput.trim());
   };
 
-  return (
-    <>
-      <div className="filter-pills" style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {FILTERS.map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`filter-pill ${filter === f ? `active-${f.toLowerCase()}` : ''}`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
+  const handleFilterChange = (event, newValue) => {
+    setFilter(newValue);
+  };
 
-        <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.2rem 0.5rem' }}>
-          <Search size={14} color="var(--text-dim)" />
-          <input 
-            type="text" 
-            placeholder="Search companies..." 
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" fontWeight="700">Active Leads</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {loading ? '…' : total} leads
+        </Typography>
+      </Box>
+
+      <Box sx={{ mb: 3, display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 2, alignItems: 'center' }}>
+        <Tabs 
+          value={filter} 
+          onChange={handleFilterChange}
+          sx={{ 
+            bgcolor: 'background.paper', 
+            borderRadius: 2, 
+            px: 1,
+            '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' }
+          }}
+        >
+          {FILTERS.map(f => (
+            <Tab 
+              key={f} 
+              label={f} 
+              value={f} 
+              sx={{ fontWeight: 700, minWidth: 80, textTransform: 'none' }}
+            />
+          ))}
+        </Tabs>
+
+        <form onSubmit={handleSearch} style={{ flexGrow: 1 }}>
+          <TextField
+            fullWidth
+            size="small"
+            placeholder="Search companies..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            style={{ border: 'none', background: 'transparent', outline: 'none', color: 'var(--text-main)', fontSize: '0.85rem', padding: '0.2rem 0.5rem' }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search size={16} />
+                </InputAdornment>
+              ),
+              sx: { borderRadius: 2, bgcolor: 'background.paper' }
+            }}
           />
         </form>
+      </Box>
 
-        <span className="ms-auto d-flex align-items-center" style={{ fontSize: '0.82rem', color: 'var(--text-dim)' }}>
-          {loading ? '…' : total} leads
-        </span>
-      </div>
+      {error && <Box sx={{ mb: 2 }}><ErrorBanner message={error} /></Box>}
 
-      {error && <ErrorBanner message={error} />}
-
-      <div className="glass-card">
-        {loading ? (
-          /* Skeleton table — exact same column structure as LeadTable */
-          <table className="page-table">
-            <colgroup>
-              {COL_WIDTHS.map((w, i) => <col key={i} style={{ width: w }} />)}
-            </colgroup>
-            <thead>
-              <tr>
-                {HEADER_LABELS.map((h, i) => (
-                  <th key={i} className={`th-cell ${i === 0 ? 'th-cell-first' : ''}`}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <SkeletonTable colWidths={COL_WIDTHS} rows={PAGE_SIZE} />
-            </tbody>
-          </table>
-        ) : (
-          <LeadTable leads={leads} onSelectLead={setSelectedLead} />
-        )}
-        <Pagination currentPage={page} totalItems={total} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={setPageSize} />
-      </div>
+      <Paper sx={{ borderRadius: 3, overflow: 'hidden', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+        <Box sx={{ overflowX: 'auto' }}>
+          {loading ? (
+            <Box sx={{ p: 4, textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">Loading leads...</Typography>
+            </Box>
+          ) : (
+            <LeadTable leads={leads} onSelectLead={setSelectedLead} />
+          )}
+        </Box>
+        <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Pagination currentPage={page} totalItems={total} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={setPageSize} />
+        </Box>
+      </Paper>
 
       <AnimatePresence>
         {selectedLead && <LeadDetails lead={selectedLead} onClose={() => setSelectedLead(null)} />}
       </AnimatePresence>
-    </>
+    </Box>
   );
 };
 

@@ -1,13 +1,26 @@
 import React, { useState } from 'react';
-import { Globe, CheckCircle2, XCircle, Search } from 'lucide-react';
-import Pagination from '../components/Pagination';
-import { SkeletonTable, ErrorBanner, TableHead } from '../components/ui';
+import { 
+  Box, 
+  Typography, 
+  Paper, 
+  TextField, 
+  InputAdornment, 
+  Chip,
+  Container
+} from '@mui/material';
+import { 
+  DataGrid 
+} from '@mui/x-data-grid';
+import { 
+  Globe, 
+  CheckCircle2, 
+  XCircle, 
+  Search,
+  ArrowUpRight
+} from 'lucide-react';
+import { ErrorBanner } from '../components/ui';
 import usePaginatedFetch from '../hooks/usePaginatedFetch';
 import { getScrapes } from '../api/services';
-
-const PAGE_SIZE  = 10;
-const COLS       = ['Company (Raw)', 'Source', 'Country', 'Team Size', 'Hiring?', 'Batch'];
-const COL_WIDTHS = ['28%', '14%', '10%', '10%', '10%', '28%'];
 
 const SOURCE_COLOR = {
   YC: '#f59e0b', ProductHunt: '#ef4444', LinkedIn: '#0077b5',
@@ -31,61 +44,135 @@ const RawScrapesPage = () => {
     setSearchQuery(searchInput.trim());
   };
 
+  const columns = [
+    { 
+      field: 'company_name_raw', 
+      headerName: 'Company (Raw)', 
+      flex: 1.5,
+      renderCell: (params) => (
+        <Typography variant="body2" fontWeight="600" sx={{ mt: 1.5 }}>
+          {params.value || '—'}
+        </Typography>
+      )
+    },
+    { 
+      field: 'source', 
+      headerName: 'Source', 
+      flex: 1,
+      renderCell: (params) => (
+        <Box sx={{ mt: 1.5 }}>
+          <Chip 
+            label={params.value || '—'} 
+            size="small"
+            icon={SOURCE_ICON[params.value] ? <span>{SOURCE_ICON[params.value]}</span> : <Globe size={11} />}
+            sx={{ 
+              bgcolor: `${SOURCE_COLOR[params.value] || '#2196f3'}15`, 
+              color: SOURCE_COLOR[params.value] || '#2196f3',
+              fontWeight: 700,
+              border: 'none'
+            }}
+          />
+        </Box>
+      )
+    },
+    { 
+      field: 'country_code', 
+      headerName: 'Country', 
+      width: 100,
+      renderCell: (params) => (
+        <Box sx={{ mt: 1.5 }}>
+          <Typography variant="caption" sx={{ fontFamily: 'monospace', bgcolor: 'action.hover', px: 0.8, py: 0.3, borderRadius: 1 }}>
+            {params.value || '—'}
+          </Typography>
+        </Box>
+      )
+    },
+    { field: 'team_size_raw', headerName: 'Team Size', width: 120 },
+    { 
+      field: 'is_hiring_raw', 
+      headerName: 'Hiring?', 
+      width: 120,
+      renderCell: (params) => (
+        <Box sx={{ mt: 1.5 }}>
+          {params.value ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'success.main' }}>
+              <CheckCircle2 size={14} />
+              <Typography variant="caption" fontWeight="700">Yes</Typography>
+            </Box>
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}>
+              <XCircle size={14} />
+              <Typography variant="caption">No</Typography>
+            </Box>
+          )}
+        </Box>
+      )
+    },
+    { 
+      field: 'batch_id', 
+      headerName: 'Batch', 
+      flex: 1,
+      renderCell: (params) => (
+        <Typography variant="caption" sx={{ fontFamily: 'monospace', color: 'text.secondary', mt: 1.5, display: 'block' }}>
+          {params.value || '—'}
+        </Typography>
+      )
+    }
+  ];
+
   return (
-    <>
-      <div className="filter-pills" style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', marginBottom: '1rem' }}>
-        <form onSubmit={handleSearch} style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-card)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.2rem 0.5rem' }}>
-          <Search size={14} color="var(--text-dim)" />
-          <input 
-            type="text" 
-            placeholder="Search raw scrape events..." 
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h5" fontWeight="700">Raw Scrape Events</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {loading ? '…' : total} total events
+        </Typography>
+      </Box>
+
+      <Box sx={{ mb: 3, display: 'flex', gap: 2 }}>
+        <form onSubmit={handleSearch} style={{ flexGrow: 1 }}>
+          <TextField
+            fullWidth
+            size="small"
+            placeholder="Search raw scrape events..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            style={{ border: 'none', background: 'transparent', outline: 'none', color: 'var(--text-main)', fontSize: '0.85rem', padding: '0.2rem 0.5rem', width: '250px' }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search size={16} />
+                </InputAdornment>
+              ),
+              sx: { borderRadius: 2, bgcolor: 'background.paper' }
+            }}
           />
         </form>
+      </Box>
 
-        <span className="ms-auto d-flex align-items-center" style={{ fontSize: '0.82rem', color: 'var(--text-dim)' }}>
-          {loading ? '…' : total} scrapes
-        </span>
-      </div>
+      {error && <Box sx={{ mb: 2 }}><ErrorBanner message={error} /></Box>}
 
-      {error && <ErrorBanner message={error} />}
-      <div className="glass-card">
-        <table className="page-table">
-          <TableHead columns={COLS} widths={COL_WIDTHS} />
-          <tbody>
-            {loading
-              ? <SkeletonTable colWidths={COL_WIDTHS} rows={PAGE_SIZE} />
-              : scrapes.map(s => (
-                <tr key={s.id} className="table-row">
-                  <td className="td-cell td-cell-first fw-semibold" style={{ fontSize: '0.88rem' }}>{s.company_name_raw || '—'}</td>
-                  <td className="td-cell">
-                    <span className="source-pill" style={{ background: `${SOURCE_COLOR[s.source] || 'var(--primary)'}18`, color: SOURCE_COLOR[s.source] || 'var(--primary)' }}>
-                      {SOURCE_ICON[s.source] || <Globe size={11} />} {s.source || '—'}
-                    </span>
-                  </td>
-                  <td className="td-cell">
-                    <code style={{ fontSize: '0.78rem', color: 'var(--text-muted)', background: 'var(--bg-main)', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
-                      {s.country_code || '—'}
-                    </code>
-                  </td>
-                  <td className="td-cell text-muted" style={{ fontSize: '0.85rem' }}>{s.team_size_raw ?? '—'}</td>
-                  <td className="td-cell">
-                    {s.is_hiring_raw
-                      ? <span className="d-flex align-items-center gap-1" style={{ color: '#10b981', fontSize: '0.8rem' }}><CheckCircle2 size={14} />Yes</span>
-                      : <span className="d-flex align-items-center gap-1 text-muted" style={{ fontSize: '0.8rem' }}><XCircle size={14} />No</span>
-                    }
-                  </td>
-                  <td className="td-cell" style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: 'var(--text-dim)' }}>{s.batch_id || '—'}</td>
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
-        <Pagination currentPage={page} totalItems={total} pageSize={pageSize} onPageChange={setPage} onPageSizeChange={setPageSize} />
-      </div>
-    </>
+      <Paper sx={{ height: 650, width: '100%', borderRadius: 3, overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
+        <DataGrid
+          rows={scrapes || []}
+          columns={columns}
+          loading={loading}
+          rowCount={total || 0}
+          paginationMode="server"
+          paginationModel={{ page: page - 1, pageSize }}
+          onPaginationModelChange={(model) => {
+            setPage(model.page + 1);
+            setPageSize(model.pageSize);
+          }}
+          pageSizeOptions={[10, 25, 50]}
+          disableRowSelectionOnClick
+          sx={{
+            border: 'none',
+            '& .MuiDataGrid-cell:focus': { outline: 'none' },
+            '& .MuiDataGrid-columnHeader:focus': { outline: 'none' },
+          }}
+        />
+      </Paper>
+    </Box>
   );
 };
 

@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Row, Col } from 'react-bootstrap';
+import { 
+  Box, 
+  Typography, 
+  Card, 
+  Paper,
+  Chip,
+  CircularProgress
+} from '@mui/material';
+import { 
+  TrendingUp, 
+  Users, 
+  Target, 
+  Zap
+} from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
-import { TrendingUp, Users, Target, Zap, ArrowUpRight, Loader2 } from 'lucide-react';
 import LeadTable from '../components/LeadTable';
 import LeadDetails from '../components/LeadDetails';
 import Pagination from '../components/Pagination';
-import { SkeletonTable, ErrorBanner } from '../components/ui';
+import { ErrorBanner } from '../components/ui';
 import usePaginatedFetch from '../hooks/usePaginatedFetch';
 import { getLeads, getDashboardStats } from '../api/services';
-import '../styles/Dashboard.css';
 
 const PAGE_SIZE = 10;
-
-// Column widths must EXACTLY match LeadTable's colgroup (6 columns)
-const LEAD_COL_WIDTHS = ['35%', '12%', '10%', '10%', '10%', '23%'];
 
 const DashboardPage = () => {
   const [selectedLead, setSelectedLead] = useState(null);
@@ -34,83 +42,77 @@ const DashboardPage = () => {
     usePaginatedFetch(getLeads, {}, PAGE_SIZE);
 
   const statCards = [
-    { label: 'Total Leads',   value: stats?.total_leads,    icon: <Users size={20} />,       colorClass: 'stat-icon--primary'   },
-    { label: 'Hot Leads',     value: stats?.hot_leads,      icon: <Zap size={20} />,         colorClass: 'stat-icon--hot'       },
-    { label: 'Warm Leads',    value: stats?.warm_leads,     icon: <TrendingUp size={20} />,  colorClass: 'stat-icon--warm'      },
-    { label: 'Pipeline /day', value: stats?.pipeline_speed, icon: <Target size={20} />,      colorClass: 'stat-icon--secondary' },
+    { label: 'Total Leads',   value: stats?.total_leads,    icon: <Users size={20} /> },
+    { label: 'Hot Leads',     value: stats?.hot_leads,      icon: <Zap size={20} /> },
+    { label: 'Warm Leads',    value: stats?.warm_leads,     icon: <TrendingUp size={20} /> },
+    { label: 'Pipeline /day', value: stats?.pipeline_speed, icon: <Target size={20} /> },
   ];
 
   return (
-    <>
-      <div className="dashboard-hero">
-        <div>
-          <h2 className="dashboard-title">Lead Intelligence Dashboard</h2>
-          <p className="dashboard-sub">Real-time AI verification and scoring for prospective clients.</p>
-        </div>
-        <button className="run-btn glass-effect">
-          <Zap size={16} className="run-btn__icon" />
-          Run New Analysis
-        </button>
-      </div>
+    <Box>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>
+          Lead Intelligence Dashboard
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Real-time AI verification and scoring for prospective clients.
+        </Typography>
+      </Box>
 
-      {/* ── Stat cards ── */}
-      <Row className="g-3 mb-0">
+      {/* Stat Cards — matching reference StatCard pattern */}
+      <Box sx={{ 
+        display: 'grid', 
+        gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, 
+        gap: 3, 
+        mb: 4 
+      }}>
         {statCards.map((card, i) => (
-          <Col key={i} xs={6} md={3}>
-            <div className="stat-card">
-              <div className="stat-card__top">
-                <div className={`stat-icon ${card.colorClass}`}>{card.icon}</div>
-                <ArrowUpRight size={14} className="stat-card__arrow" />
-              </div>
-              <div className="stat-card__label">{card.label}</div>
-              <div className="stat-card__value">
-                {statsLoading
-                  ? <Loader2 size={22} className="stat-spinner" />
-                  : (card.value ?? '—')
-                }
-              </div>
-            </div>
-          </Col>
+          <Card key={i} sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Typography variant="overline" color="text.secondary">{card.label}</Typography>
+              <Box color="primary.main">{card.icon}</Box>
+            </Box>
+            <Typography variant="h4">
+              {statsLoading ? <CircularProgress size={24} thickness={4} /> : (card.value ?? '—')}
+            </Typography>
+          </Card>
         ))}
-      </Row>
+      </Box>
 
-      {/* ── Leads table ── */}
-      {error && <div className="card-to-table-gap"><ErrorBanner message={error} /></div>}
+      {/* Leads table section */}
+      {error && <Box sx={{ mb: 3 }}><ErrorBanner message={error} /></Box>}
 
-      <div className="glass-card card-to-table-gap">
-        <div className="table-header-bar">
-          <h3 className="table-header-bar__title">Qualified Prospects</h3>
-          <span className="table-header-bar__count">{leadsLoading ? '…' : total} total</span>
-        </div>
+      <Card sx={{ p: 0 }}>
+        <Box sx={{ p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h6">Qualified Prospects</Typography>
+          <Chip 
+            label={`${leadsLoading ? '…' : total} total`} 
+            size="small" 
+            sx={{ fontWeight: 700 }} 
+          />
+        </Box>
 
-        {/* Skeleton and LeadTable share the same <table> with colgroup */}
-        {leadsLoading ? (
-          <table className="page-table">
-            <colgroup>
-              {LEAD_COL_WIDTHS.map((w, i) => <col key={i} style={{ width: w }} />)}
-            </colgroup>
-            <thead>
-              <tr>
-                {['COMPANY', 'INDUSTRY', 'LOCATION', 'SCORE', 'VERDICT', 'ACTION'].map((h, i) => (
-                  <th key={i} className={`th-cell ${i === 0 ? 'th-cell-first' : ''}`}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <SkeletonTable colWidths={LEAD_COL_WIDTHS} rows={PAGE_SIZE} />
-            </tbody>
-          </table>
-        ) : (
-          <LeadTable leads={leads} onSelectLead={setSelectedLead} />
-        )}
+        <Box sx={{ overflowX: 'auto' }}>
+          {leadsLoading ? (
+            <Box sx={{ textAlign: 'center', py: 8 }}>
+              <CircularProgress size={40} sx={{ mb: 2 }} />
+              <Typography variant="body2" color="text.secondary">Loading leads...</Typography>
+            </Box>
+          ) : (
+            <LeadTable leads={leads} onSelectLead={setSelectedLead} />
+          )}
+        </Box>
 
-        <Pagination currentPage={page} totalItems={total} pageSize={PAGE_SIZE} onPageChange={setPage} />
-      </div>
+        <Box sx={{ p: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+          <Pagination currentPage={page} totalItems={total} pageSize={PAGE_SIZE} onPageChange={setPage} />
+        </Box>
+      </Card>
 
       <AnimatePresence>
         {selectedLead && <LeadDetails lead={selectedLead} onClose={() => setSelectedLead(null)} />}
       </AnimatePresence>
-    </>
+    </Box>
   );
 };
 

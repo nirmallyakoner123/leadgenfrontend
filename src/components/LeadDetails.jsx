@@ -1,146 +1,164 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { 
+  Box, 
+  Typography, 
+  Drawer, 
+  IconButton, 
+  Avatar, 
+  Chip, 
+  Divider, 
+  Button, 
+  Stack,
+  Paper
+} from '@mui/material';
 import { X, ExternalLink, Globe, Briefcase, Zap, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const LeadDetails = ({ lead, onClose }) => {
   return (
-    <motion.div 
-      initial={{ x: '100%' }}
-      animate={{ x: 0 }}
-      exit={{ x: '100%' }}
-      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      style={{ 
-        position: 'fixed', 
-        top: 0, 
-        right: 0, 
-        width: '100%', 
-        maxWidth: '500px', 
-        height: '100vh', 
-        background: 'var(--bg-sidebar)',
-        borderLeft: '1px solid var(--border-color)',
-        zIndex: 100,
-        boxShadow: '-10px 0 30px rgba(0,0,0,0.5)',
-        padding: '2rem',
-        overflowY: 'auto'
+    <Drawer
+      anchor="right"
+      open={!!lead}
+      onClose={onClose}
+      PaperProps={{
+        sx: { width: { xs: '100%', sm: 500 }, bgcolor: 'background.default', p: 3, backgroundImage: 'none' }
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h3 style={{ fontSize: '1.5rem' }}>Lead Intelligence</h3>
-        <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}>
-          <X size={24} />
-        </button>
-      </div>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h6" fontWeight="700">Lead Intelligence</Typography>
+        <IconButton onClick={onClose} size="small" sx={{ color: 'text.secondary' }}>
+          <X size={20} />
+        </IconButton>
+      </Box>
 
-      <div className="glass-card" style={{ padding: '1.5rem', marginBottom: '2rem', border: '1px solid var(--primary)33' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
-          <div style={{ 
-            width: '48px', 
-            height: '48px', 
-            borderRadius: '12px', 
-            background: 'var(--primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '1.5rem',
-            fontWeight: 700,
-            color: 'white'
-          }}>
-            {lead.name_display.charAt(0)}
-          </div>
-          <div>
-            <h4 style={{ fontSize: '1.25rem', marginBottom: '0.25rem' }}>{lead.name_display}</h4>
-            <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem' }}>
-              <a href={lead.website} target="_blank" rel="noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                <Globe size={14} />
-                Website <ExternalLink size={12} />
-              </a>
-              <span style={{ color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                <Briefcase size={14} />
-                {lead.industry}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <span style={{ background: 'var(--bg-main)', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{lead.team_size} Employees</span>
-          <span style={{ background: 'var(--bg-main)', padding: '0.25rem 0.75rem', borderRadius: '4px', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{lead.city}, {lead.country_code}</span>
-        </div>
-      </div>
+      {lead && (
+        <>
+          <Paper 
+            variant="outlined" 
+            sx={{ 
+              p: 2.5, 
+              mb: 4, 
+              borderRadius: 3, 
+              bgcolor: 'rgba(25, 118, 210, 0.04)',
+              borderColor: 'rgba(25, 118, 210, 0.2)'
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+              <Avatar 
+                sx={{ 
+                  width: 48, 
+                  height: 48, 
+                  fontSize: '1.25rem', 
+                  bgcolor: 'primary.main',
+                  fontWeight: 700,
+                  borderRadius: 2
+                }}
+              >
+                {lead.name_display.charAt(0)}
+              </Avatar>
+              <Box>
+                <Typography variant="h6" sx={{ lineHeight: 1.2, mb: 0.5 }}>{lead.name_display}</Typography>
+                <Stack direction="row" spacing={2}>
+                  <Box component="a" href={lead.website} target="_blank" rel="noreferrer" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'primary.main', textDecoration: 'none', fontSize: '0.8125rem' }}>
+                    <Globe size={14} />
+                    Website <ExternalLink size={12} />
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.secondary', fontSize: '0.8125rem' }}>
+                    <Briefcase size={14} />
+                    {lead.industry}
+                  </Box>
+                </Stack>
+              </Box>
+            </Box>
+            <Stack direction="row" spacing={1}>
+              <Chip label={`${lead.team_size} Employees`} size="small" variant="outlined" sx={{ borderRadius: 1.5, fontSize: '0.75rem', borderColor: 'divider' }} />
+              <Chip label={`${lead.city}, ${lead.country_code}`} size="small" variant="outlined" sx={{ borderRadius: 1.5, fontSize: '0.75rem', borderColor: 'divider' }} />
+            </Stack>
+          </Paper>
 
-      <div style={{ marginBottom: '2rem' }}>
-        <h5 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--text-dim)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <Zap size={18} color="var(--primary)" />
-          AI VERDICT: {lead.verdict} (Score: {lead.final_score}/18)
-        </h5>
-        <div className="glass-card" style={{ padding: '1.5rem', background: 'rgba(59, 130, 246, 0.05)' }}>
-          <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
-            {lead.why_they_fit}
-          </p>
-          <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-            <span style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 700, textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem' }}>Recommended Outreach Opener</span>
-            <p style={{ fontSize: '0.9rem', fontStyle: 'italic', color: 'var(--text-muted)' }}>
-              "{lead.outreach_opener}"
-            </p>
-          </div>
-        </div>
-      </div>
+          <Box sx={{ mb: 4 }}>
+            <Typography 
+              variant="overline" 
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 1, 
+                color: 'primary.main', 
+                fontWeight: 800,
+                mb: 1.5
+              }}
+            >
+              <Zap size={16} />
+              AI VERDICT: {lead.verdict} ({lead.final_score}/18)
+            </Typography>
+            <Paper 
+              variant="outlined" 
+              sx={{ 
+                p: 2.5, 
+                borderRadius: 3, 
+                bgcolor: 'rgba(255, 255, 255, 0.02)',
+                borderColor: 'divider'
+              }}
+            >
+              <Typography variant="body2" sx={{ lineHeight: 1.6, mb: 2 }}>
+                {lead.why_they_fit}
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 800, display: 'block', mb: 1, textTransform: 'uppercase' }}>
+                Recommended Outreach Opener
+              </Typography>
+              <Typography variant="body2" sx={{ fontStyle: 'italic', color: 'text.secondary' }}>
+                "{lead.outreach_opener}"
+              </Typography>
+            </Paper>
+          </Box>
 
-      <div>
-        <h5 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--text-dim)' }}>Verification Signals</h5>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          {lead.signal_results.map((signal, idx) => (
-            <div key={idx} style={{ 
-              display: 'flex', 
-              alignItems: 'flex-start', 
-              gap: '1rem', 
-              padding: '1rem', 
-              background: 'var(--bg-card)', 
-              borderRadius: '12px',
-              border: '1px solid var(--border-color)'
-            }}>
-              {signal.passed ? (
-                <CheckCircle2 size={20} color="#10b981" />
-              ) : (
-                <AlertCircle size={20} color="var(--text-dim)" />
-              )}
-              <div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 600, color: signal.passed ? 'var(--text-main)' : 'var(--text-dim)' }}>
-                  {signal.signal_id.replace(/_/g, ' ').toUpperCase()}
-                </div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{signal.evidence}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="subtitle2" sx={{ mb: 2, color: 'text.secondary', fontWeight: 700 }}>
+              Verification Signals
+            </Typography>
+            <Stack spacing={1.5}>
+              {lead.signal_results.map((signal, idx) => (
+                <Paper 
+                  key={idx} 
+                  variant="outlined" 
+                  sx={{ 
+                    p: 2, 
+                    borderRadius: 2.5,
+                    bgcolor: 'background.paper',
+                    display: 'flex',
+                    gap: 2,
+                    borderColor: 'divider'
+                  }}
+                >
+                  {signal.passed ? (
+                    <CheckCircle2 size={20} color="#10b981" />
+                  ) : (
+                    <AlertCircle size={20} style={{ color: 'rgba(255, 255, 255, 0.3)' }} />
+                  )}
+                  <Box>
+                    <Typography variant="caption" sx={{ fontWeight: 800, display: 'block', mb: 0.5, color: signal.passed ? 'text.primary' : 'text.secondary' }}>
+                      {signal.signal_id.replace(/_/g, ' ').toUpperCase()}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block', lineHeight: 1.4 }}>
+                      {signal.evidence}
+                    </Typography>
+                  </Box>
+                </Paper>
+              ))}
+            </Stack>
+          </Box>
 
-      <div style={{ marginTop: '2rem', display: 'flex', gap: '1rem' }}>
-        <button style={{ 
-          flex: 1, 
-          padding: '0.75rem', 
-          borderRadius: '12px', 
-          background: 'var(--primary)', 
-          color: 'white', 
-          border: 'none', 
-          fontWeight: 600,
-          cursor: 'pointer'
-        }}>
-          Copy Outreach
-        </button>
-        <button style={{ 
-          flex: 1, 
-          padding: '0.75rem', 
-          borderRadius: '12px', 
-          background: 'transparent', 
-          color: 'var(--text-main)', 
-          border: '1px solid var(--border-color)', 
-          fontWeight: 600,
-          cursor: 'pointer'
-        }}>
-          Export PDF
-        </button>
-      </div>
-    </motion.div>
+          <Stack direction="row" spacing={2} sx={{ mt: 'auto' }}>
+            <Button variant="contained" fullWidth sx={{ borderRadius: 2, py: 1, fontWeight: 700, textTransform: 'none' }}>
+              Copy Outreach
+            </Button>
+            <Button variant="outlined" fullWidth sx={{ borderRadius: 2, py: 1, fontWeight: 700, textTransform: 'none', color: 'text.primary', borderColor: 'divider' }}>
+              Export PDF
+            </Button>
+          </Stack>
+        </>
+      )}
+    </Drawer>
   );
 };
 
